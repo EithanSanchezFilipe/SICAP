@@ -9,6 +9,9 @@ npm-shrinkwrap.json
 yarn-error.log
 yarn.lock
 
+# dotenv environment variables file
+.env
+
 # Coveralls
 .nyc_output
 coverage
@@ -18,3 +21,4 @@ benchmarks/graphs
 
 # ignore additional files using core.excludesFile
 # https://git-scm.com/docs/gitignore
+/src/generated/prisma
