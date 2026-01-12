@@ -6,15 +6,26 @@ import prisma from "../lib/prisma.js";
 
 const app = express();
 app.use(express.json());
-app.use("/machines", machineRouter);
+app.use("/machine", machineRouter);
+
+let createdMachineId: number;
 
 describe("Machine API", () => {
   beforeAll(async () => {
     await prisma.machine.deleteMany();
+
+    const machine = await prisma.machine.create({
+      data: {
+        name: "Bourreuse1",
+        location: "Lab 1",
+      },
+    });
+
+    createdMachineId = machine.id;
   });
 
   it("should create a new machine", async () => {
-    const res = await request(app).post("/machines").send({
+    const res = await request(app).post("/machine").send({
       name: "Test Machine",
       location: "Lab 1",
     });
@@ -24,8 +35,29 @@ describe("Machine API", () => {
   });
 
   it("should get all machines", async () => {
-    const res = await request(app).get("/machines");
+    const res = await request(app).get("/machine");
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it("should update a machine", async () => {
+    const res = await request(app)
+      .put(`/machine/${createdMachineId}`)
+      .send({ name: "Regaleuse1" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe("Regaleuse1");
+  });
+
+  it("should delete a machine", async () => {
+    const res = await request(app).delete(`/machine/${createdMachineId}`);
+
+    expect(res.status).toBe(204);
+
+    const deletedMachine = await prisma.machine.findUnique({
+      where: { id: createdMachineId },
+    });
+
+    expect(deletedMachine).toBeNull();
   });
 });
