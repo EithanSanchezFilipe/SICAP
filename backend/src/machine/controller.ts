@@ -80,3 +80,24 @@ const updateMachine = async (req: Request, res: Response) => {
   }
 };
 
+const deleteMachine = async (req: Request, res: Response) => {
+  const parsed = parseParamId(req.params, res);
+  if (!parsed) return;
+
+  try {
+    await prisma.machine.delete({
+      where: { id: parsed.id },
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: "Could not delete machine" });
+  }
+};
+
+export {
+  getMachines,
+  getMachineById,
+  createMachine,
+  updateMachine,
+  deleteMachine,
+};
