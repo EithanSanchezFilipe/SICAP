@@ -1,6 +1,8 @@
 import prisma from "../lib/prisma.js";
 import type { Request, Response } from "express";
 import type { GetMachinesQuery, MachineSummary } from "./interface.js";
+import { parseParamId } from "../lib/parseParams.js";
+
 const getMachines = (req: Request, res: Response) => {
   const query = req.query as GetMachinesQuery;
 
@@ -21,5 +23,27 @@ const getMachines = (req: Request, res: Response) => {
     .catch((error) => {
       console.error(error);
       res.status(500).json({ message: "Something went wrong" });
+    });
+};
+
+const getMachineById = (req: Request, res: Response) => {
+  const params = parseParamId(req.params, res);
+  if (!params) return;
+  prisma.machine
+    .findUnique({
+      where: { id: params.id },
+      include: {
+        sensors: { select: { id: true, name: true, type: true } },
+      },
+    })
+    .then((machine) => {
+      if (!machine) {
+        return res.status(404).json({ message: "Machine not found" });
+      }
+      res.status(200).json(machine);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
     });
 };
