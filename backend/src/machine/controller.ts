@@ -47,3 +47,21 @@ const getMachineById = (req: Request, res: Response) => {
       res.status(500).json({ message: "Internal server error" });
     });
 };
+
+const createMachine = async (req: Request, res: Response) => {
+  const { name, location } = req.body;
+
+  if (!name || !location) {
+    return res.status(400).json({ message: "Name and location are required." });
+  }
+
+  try {
+    const newMachine = await prisma.machine.create({
+      data: { name, location },
+    });
+    res.status(201).json(newMachine);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create machine" });
+  }
+};
+
