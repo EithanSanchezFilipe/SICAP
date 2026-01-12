@@ -65,3 +65,18 @@ const createMachine = async (req: Request, res: Response) => {
   }
 };
 
+const updateMachine = async (req: Request, res: Response) => {
+  const parsed = parseParamId(req.params, res);
+  if (!parsed) return;
+
+  try {
+    const updated = await prisma.machine.update({
+      where: { id: parsed.id },
+      data: req.body,
+    });
+    res.json(updated);
+  } catch (error) {
+    res.status(404).json({ message: "Machine not found or update failed" });
+  }
+};
+
