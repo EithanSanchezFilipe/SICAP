@@ -1,24 +1,16 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
-import express from "express";
-import machineRouter from "./router.js";
+import app from "../app.js"; // ton app qui fait RegisterRoutes(app)
 import prisma from "../lib/prisma.js";
-
-const app = express();
-app.use(express.json());
-app.use("/machine", machineRouter);
 
 let createdMachineId: number;
 
-describe("Machine API", () => {
+describe("Machine API (TSOA)", () => {
   beforeAll(async () => {
     await prisma.machine.deleteMany();
 
     const machine = await prisma.machine.create({
-      data: {
-        name: "Bourreuse1",
-        location: "Lab 1",
-      },
+      data: { name: "Bourreuse1", location: "Lab 1" },
     });
 
     createdMachineId = machine.id;
