@@ -11,6 +11,7 @@ yarn.lock
 
 # dotenv environment variables file
 .env
+.env.test
 
 # Coveralls
 .nyc_output
