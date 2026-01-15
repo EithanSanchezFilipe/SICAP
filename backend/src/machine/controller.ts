@@ -29,29 +29,41 @@ export class MachineController extends Controller {
   @Get()
   @Response<{ message: string }>(404, "No machines found")
   @Response<{ message: string }>(500, "Something went wrong")
-  public getMachines(
+  public async getMachines(
     @Query() name?: string
   ): Promise<MachineSummary[] | { message: string }> {
-    return prisma.machine
-      .findMany({
+    // Adjust type to match your Machine interface
+    try {
+      const machines = await prisma.machine.findMany({
         where: name ? { name: { contains: name, mode: "insensitive" } } : {},
-        select: { id: true, name: true },
-      })
-      .then((machines) => {
-        if (!machines.length) {
-          this.setStatus(404);
-          return {
-            message: "No machines found matching your search criteria.",
-          };
-        }
-
-        return machines;
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setStatus(500);
-        return { message: "Something went wrong" };
+        // 1. SELECT the fields you need
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          _count: {
+            select: { sensors: true }, // 2. GET the number of sensors
+          },
+        },
       });
+
+      if (!machines.length) {
+        this.setStatus(404);
+        return { message: "No machines found matching your search criteria." };
+      }
+
+      // 3. MAP the data so the frontend sees 'sensors' as a number or array
+      return machines.map((m) => ({
+        id: m.id,
+        name: m.name,
+        location: m.location,
+        sensorCount: m._count.sensors,
+      }));
+    } catch (error) {
+      console.error(error);
+      this.setStatus(500);
+      return { message: "Something went wrong" };
+    }
   }
 
   /** Get a machine by ID */

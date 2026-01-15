@@ -3,6 +3,7 @@ import { SensorResponse } from "../sensor/interface.js";
 export interface MachineSummary {
   id: number;
   name: string;
+  location: string;
 }
 
 export interface CreateMachineBody {
