@@ -19,14 +19,14 @@ model Machine {
   name      String
   location  String
   createdAt DateTime @default(now())
-  sensors   Sensor[]
+  sensors   Sensor[] // no onDelete here
 }
 
 model Sensor {
   id        Int      @id @default(autoincrement())
   name      String
   type      String
-  machine   Machine  @relation(fields: [machineId], references: [id])
+  machine   Machine  @relation(fields: [machineId], references: [id], onDelete: Cascade)
   machineId Int
   createdAt DateTime @default(now())
 }

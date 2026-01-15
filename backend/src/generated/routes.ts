@@ -4,6 +4,8 @@
 import type { TsoaRoute } from '@tsoa/runtime';
 import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { SensorController } from './../sensor/controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { MachineController } from './../machine/controller';
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
@@ -12,11 +14,11 @@ import type { Request as ExRequest, Response as ExResponse, RequestHandler, Rout
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "MachineSummary": {
+    "SensorMeasurement": {
         "dataType": "refObject",
         "properties": {
-            "id": {"dataType":"double","required":true},
-            "name": {"dataType":"string","required":true},
+            "time": {"dataType":"string","required":true},
+            "value": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -27,6 +29,17 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"double","required":true},
             "name": {"dataType":"string","required":true},
             "type": {"dataType":"string","required":true},
+            "machineId": {"dataType":"double"},
+            "measurements": {"dataType":"array","array":{"dataType":"refObject","ref":"SensorMeasurement"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MachineSummary": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"double","required":true},
+            "name": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -78,6 +91,128 @@ export function RegisterRoutes(app: Router) {
 
 
     
+        const argsSensorController_getSensorsInformation: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.get('/sensor/:id',
+            ...(fetchMiddlewares<RequestHandler>(SensorController)),
+            ...(fetchMiddlewares<RequestHandler>(SensorController.prototype.getSensorsInformation)),
+
+            async function SensorController_getSensorsInformation(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSensorController_getSensorsInformation, request, response });
+
+                const controller = new SensorController();
+
+              await templateService.apiHandler({
+                methodName: 'getSensorsInformation',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSensorController_createSensor: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"type":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
+        };
+        app.post('/sensor/:id',
+            ...(fetchMiddlewares<RequestHandler>(SensorController)),
+            ...(fetchMiddlewares<RequestHandler>(SensorController.prototype.createSensor)),
+
+            async function SensorController_createSensor(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSensorController_createSensor, request, response });
+
+                const controller = new SensorController();
+
+              await templateService.apiHandler({
+                methodName: 'createSensor',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 201,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSensorController_updateSensor: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"type":{"dataType":"string"},"name":{"dataType":"string"}}},
+        };
+        app.put('/sensor/:id',
+            ...(fetchMiddlewares<RequestHandler>(SensorController)),
+            ...(fetchMiddlewares<RequestHandler>(SensorController.prototype.updateSensor)),
+
+            async function SensorController_updateSensor(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSensorController_updateSensor, request, response });
+
+                const controller = new SensorController();
+
+              await templateService.apiHandler({
+                methodName: 'updateSensor',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 200,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSensorController_deleteSensor: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+        };
+        app.delete('/sensor/:id',
+            ...(fetchMiddlewares<RequestHandler>(SensorController)),
+            ...(fetchMiddlewares<RequestHandler>(SensorController.prototype.deleteSensor)),
+
+            async function SensorController_deleteSensor(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSensorController_deleteSensor, request, response });
+
+                const controller = new SensorController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteSensor',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: 204,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsMachineController_getMachines: Record<string, TsoaRoute.ParameterSchema> = {
                 name: {"in":"query","name":"name","dataType":"string"},
         };

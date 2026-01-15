@@ -11,13 +11,15 @@
     "db:push:test": "dotenv -e .env.test -- npx prisma db push --accept-data-loss",
     "test": "npm run db:push:test && vitest",
     "tsoa:routes": "tsoa routes",
-    "tsoa:spec": "tsoa spec"
+    "tsoa:spec": "tsoa spec",
+    "generate:mock": "npx tsx src/lib/mockData.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.35.0",
     "@prisma/client": "^6.19.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
