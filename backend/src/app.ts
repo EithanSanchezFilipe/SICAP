@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { RegisterRoutes } from "./generated/routes.js";
 import swaggerDocument from "./generated/swagger.json" with { type: "json" };
 import swaggerUi from "swagger-ui-express";
+import "dotenv/config";
 
 const port = process.env.PORT || "3000";
 const host = process.env.HOST || "localhost";
