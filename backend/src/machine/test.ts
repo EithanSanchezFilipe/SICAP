@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 import app from "../app.js"; // ton app qui fait RegisterRoutes(app)
-import prisma from "../lib/prisma.js";
+import { PrismaClient } from "../generated/prisma/client.js";
 
+const prisma = new PrismaClient();
 let createdMachineId: number;
 
 describe("Machine API (TSOA)", () => {

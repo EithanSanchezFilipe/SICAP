@@ -11,21 +11,24 @@ import {
   Response,
   SuccessResponse,
 } from "tsoa";
-import prisma from "../lib/prisma.js";
 import type {
   MachineSummary,
-  GetMachinesQuery,
   MachineResponse,
   CreateMachineBody,
   UpdateMachineBody,
 } from "./interface.js";
+import { PrismaClient } from "../generated/prisma/client.js";
+
+const prisma = new PrismaClient();
 
 @Route("machine")
 export class MachineController extends Controller {
   @Get()
   @Response<{ message: string }>(404, "No machines found")
   @Response<{ message: string }>(500, "Something went wrong")
-  public getMachines(@Query() name?: string): Promise<MachineSummary[]> {
+  public getMachines(
+    @Query() name?: string
+  ): Promise<MachineSummary[] | { message: string }> {
     return prisma.machine
       .findMany({
         where: name ? { name: { contains: name, mode: "insensitive" } } : {},
@@ -34,44 +37,53 @@ export class MachineController extends Controller {
       .then((machines) => {
         if (!machines.length) {
           this.setStatus(404);
-          throw new Error("No machines found matching your search criteria.");
+          return {
+            message: "No machines found matching your search criteria.",
+          };
         }
+
         return machines;
       })
       .catch((error) => {
         console.error(error);
         this.setStatus(500);
-        throw new Error("Something went wrong");
+        return { message: "Something went wrong" };
       });
   }
 
   /** Get a machine by ID */
   @Get("{id}")
+  @Response<{ message: string }>(400, "Invalid machine ID")
   @Response<{ message: string }>(404, "Machine not found")
   @Response<{ message: string }>(500, "Internal server error")
-  public getMachineById(@Path() id: string): Promise<MachineResponse> {
+  public getMachineById(
+    @Path() id: string
+  ): Promise<MachineResponse | { message: string }> {
     const numericId = Number(id);
     if (isNaN(numericId)) {
       this.setStatus(400);
-      return Promise.reject(new Error("Invalid machine ID"));
+      return Promise.resolve({ message: "Invalid machine ID" });
     }
 
     return prisma.machine
       .findUnique({
         where: { id: numericId },
-        include: { sensors: { select: { id: true, name: true, type: true } } },
+        include: {
+          sensors: { select: { id: true, name: true, type: true } },
+        },
       })
       .then((machine) => {
         if (!machine) {
           this.setStatus(404);
-          throw new Error("Machine not found");
+          return { message: "Machine not found" };
         }
+
         return machine;
       })
       .catch((error) => {
         console.error(error);
         this.setStatus(500);
-        throw new Error("Internal server error");
+        return { message: "Internal server error" };
       });
   }
 
@@ -82,66 +94,83 @@ export class MachineController extends Controller {
   @Response<{ message: string }>(500, "Failed to create machine")
   public createMachine(
     @Body() body: CreateMachineBody
-  ): Promise<MachineResponse> {
+  ): Promise<MachineResponse | { message: string }> {
     const { name, location } = body;
 
     if (!name || !location) {
       this.setStatus(400);
-      return Promise.reject(new Error("Name and location are required."));
+      return Promise.resolve({ message: "Name and location are required." });
     }
 
     return prisma.machine
       .create({ data: { name, location } })
       .then((newMachine) => {
         this.setStatus(201);
-        return newMachine;
+        return {
+          ...newMachine,
+          sensors: null,
+        };
       })
       .catch((error) => {
         console.error(error);
         this.setStatus(500);
-        throw new Error("Failed to create machine");
+        return { message: "Failed to create machine" };
       });
   }
 
   /** Update a machine by ID */
   @Put("{id}")
+  @Response<{ message: string }>(400, "Invalid machine ID")
   @Response<{ message: string }>(404, "Machine not found or update failed")
   public updateMachine(
     @Path() id: string,
     @Body() body: UpdateMachineBody
-  ): Promise<MachineResponse> {
+  ): Promise<MachineResponse | { message: string }> {
     const numericId = Number(id);
     if (isNaN(numericId)) {
       this.setStatus(400);
-      return Promise.reject(new Error("Invalid machine ID"));
+      return Promise.resolve({ message: "Invalid machine ID" });
     }
 
     return prisma.machine
-      .update({ where: { id: numericId }, data: body })
+      .update({
+        where: { id: numericId },
+        data: body,
+      })
+      .then((updatedMachine) => ({
+        ...updatedMachine,
+        sensors: null,
+      }))
       .catch((error) => {
+        console.error(error);
         this.setStatus(404);
-        throw new Error("Machine not found or update failed");
+        return { message: "Machine not found or update failed" };
       });
   }
 
   /** Delete a machine by ID */
   @Delete("{id}")
-  @Response<{ message: string }>(500, "Could not delete machine")
   @SuccessResponse("204", "Deleted")
-  public deleteMachine(@Path() id: string): Promise<void> {
+  @Response<{ message: string }>(400, "Invalid machine ID")
+  @Response<{ message: string }>(500, "Could not delete machine")
+  public deleteMachine(
+    @Path() id: string
+  ): Promise<void | { message: string }> {
     const numericId = Number(id);
     if (isNaN(numericId)) {
       this.setStatus(400);
-      return Promise.reject(new Error("Invalid machine ID"));
+      return Promise.resolve({ message: "Invalid machine ID" });
     }
 
     return prisma.machine
       .delete({ where: { id: numericId } })
-      .then(() => this.setStatus(204))
+      .then(() => {
+        this.setStatus(204);
+      })
       .catch((error) => {
         console.error(error);
         this.setStatus(500);
-        throw new Error("Could not delete machine");
+        return { message: "Could not delete machine" };
       });
   }
 }

@@ -1,13 +1,8 @@
+import { SensorResponse } from "../sensor/interface.js";
+
 interface MachineSummary {
   id: number;
   name: string;
-}
-
-interface MachineResponse {
-  id: number;
-  name: string;
-  location: string;
-  sensors?: { id: number; name: string; type: string }[];
 }
 
 interface CreateMachineBody {
@@ -19,6 +14,15 @@ interface UpdateMachineBody {
   name?: string;
   location?: string;
 }
+
+interface MachineResponse {
+  id: number;
+  name: string;
+  location: string;
+  createdAt: Date;
+  sensors: SensorResponse[] | null;
+}
+
 export type {
   MachineSummary,
   MachineResponse,
