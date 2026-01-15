@@ -11,12 +11,15 @@ import {
   Response,
   SuccessResponse,
 } from "tsoa";
+
 import type {
   MachineSummary,
   MachineResponse,
   CreateMachineBody,
   UpdateMachineBody,
 } from "./interface.js";
+
+import { getSensorData } from "../lib/influxDbHelper.js";
 import { PrismaClient } from "../generated/prisma/client.js";
 
 const prisma = new PrismaClient();
@@ -78,9 +81,32 @@ export class MachineController extends Controller {
           return { message: "Machine not found" };
         }
 
+        // If the machine has sensors, fetch last 5 minutes of data for each
+        if (machine.sensors.length > 0) {
+          const sensorPromises = machine.sensors.map((sensor) =>
+            getSensorData(sensor.id.toString(), machine.id.toString(), "-5m")
+              .then((measurements) => ({
+                ...sensor,
+                measurements, // attach the last 5 min data
+              }))
+              .catch((error: any) => {
+                console.error(
+                  `Error fetching data for sensor ${sensor.id}:`,
+                  error
+                );
+                return { ...sensor, measurements: [] }; // fallback empty array
+              })
+          );
+
+          return Promise.all(sensorPromises).then((sensorsWithData) => ({
+            ...machine,
+            sensors: sensorsWithData,
+          }));
+        }
+
         return machine;
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.error(error);
         this.setStatus(500);
         return { message: "Internal server error" };
