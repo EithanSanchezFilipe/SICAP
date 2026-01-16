@@ -29,31 +29,43 @@ export class MachineController extends Controller {
   @Get()
   @Response<{ message: string }>(404, "No machines found")
   @Response<{ message: string }>(500, "Something went wrong")
-  public getMachines(
+  @Get()
+  @Response<{ message: string }>(404, "No machines found")
+  @Response<{ message: string }>(500, "Something went wrong")
+  public async getMachines(
     @Query() name?: string
   ): Promise<MachineSummary[] | { message: string }> {
-    return prisma.machine
-      .findMany({
+    try {
+      const machines = await prisma.machine.findMany({
         where: name ? { name: { contains: name, mode: "insensitive" } } : {},
-        select: { id: true, name: true },
-      })
-      .then((machines) => {
-        if (!machines.length) {
-          this.setStatus(404);
-          return {
-            message: "No machines found matching your search criteria.",
-          };
-        }
-
-        return machines;
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setStatus(500);
-        return { message: "Something went wrong" };
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          _count: {
+            select: { sensors: true },
+          },
+        },
       });
-  }
 
+      if (!machines || machines.length === 0) {
+        this.setStatus(404);
+        return { message: "No machines found matching your search criteria." };
+      }
+      const result: MachineSummary[] = machines.map((m) => ({
+        id: m.id,
+        name: m.name,
+        location: m.location,
+        sensorCount: m._count.sensors,
+      }));
+
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      this.setStatus(500);
+      return { message: "Something went wrong" };
+    }
+  }
   /** Get a machine by ID */
   @Get("{id}")
   @Response<{ message: string }>(400, "Invalid machine ID")

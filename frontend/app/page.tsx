@@ -1,4 +1,52 @@
-export default function Home() {
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { machineService } from "@/services/machineService";
+import { toast } from "sonner";
+import { MachineHome } from "@/types/machine";
+
+export default function DashboardPage() {
+  const [search, setSearch] = useState("");
+  const [machines, setMachines] = useState<MachineHome[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await machineService.getAll();
+        // Ensure data is an array before setting state
+        setMachines(Array.isArray(data) ? data : []);
+        console.log(data);
+      } catch (err: any) {
+        const msg = err.response?.data?.message || "Could not load machines.";
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const filteredMachines = machines.filter(
+    (m) =>
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.location.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading)
+    return (
+      <div className="p-8 text-center text-gray-500">Loading machines...</div>
+    );
+  if (error)
+    return (
+      <div className="p-8 text-red-500 text-center font-semibold">{error}</div>
+    );
+
   return (
     <div className="p-8 space-y-6">
       <div className="flex justify-between items-center">
@@ -35,7 +83,7 @@ export default function Home() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredMachines.map((machine) => (
+            {filteredMachines.map((machine: MachineHome) => (
               <tr
                 key={machine.id}
                 className="hover:bg-blue-50/40 cursor-pointer transition-all"
