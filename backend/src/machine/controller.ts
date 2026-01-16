@@ -11,7 +11,7 @@ import {
   Response,
   SuccessResponse,
 } from "tsoa";
-
+import type { SensorMeasurement } from "../sensor/interface.js";
 import type {
   MachineSummary,
   MachineResponse,
@@ -84,8 +84,8 @@ export class MachineController extends Controller {
         // If the machine has sensors, fetch last 5 minutes of data for each
         if (machine.sensors.length > 0) {
           const sensorPromises = machine.sensors.map((sensor) =>
-            getSensorData(sensor.id.toString(), machine.id.toString(), "-5m")
-              .then((measurements) => ({
+            getSensorData(sensor.id.toString(), machine.id.toString(), "-1m")
+              .then((measurements: SensorMeasurement[]) => ({
                 ...sensor,
                 measurements, // attach the last 5 min data
               }))

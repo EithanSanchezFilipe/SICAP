@@ -12,7 +12,8 @@
     "test": "npm run db:push:test && vitest",
     "tsoa:routes": "tsoa routes",
     "tsoa:spec": "tsoa spec",
-    "generate:mock": "npx tsx src/lib/mockData.ts"
+    "generate:mock": "npx tsx src/lib/mockData.ts",
+    "generate:data": "npx tsx src/lib/realTimeGenerator.ts"
   },
   "keywords": [],
   "author": "",
