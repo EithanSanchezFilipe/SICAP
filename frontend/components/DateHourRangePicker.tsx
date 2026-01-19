@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, Loader2 } from "lucide-react"; // Loader2 imported here
 import { Input } from "@/components/ui/input";
 
 type DateRange = {
@@ -19,11 +19,12 @@ type DateRange = {
 
 type Props = {
   onChange: (range: DateRange) => void;
+  isLoading?: boolean;
 };
 
-export function DateRangePicker({ onChange }: Props) {
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
+export function DateRangePicker({ onChange, isLoading = false }: Props) {
+  const [fromDate, setFromDate] = useState<Date>(new Date());
+  const [toDate, setToDate] = useState<Date>(new Date());
 
   const [fromTime, setFromTime] = useState("00:00");
   const [toTime, setToTime] = useState("23:59");
@@ -122,8 +123,20 @@ export function DateRangePicker({ onChange }: Props) {
           minDate={fromDate}
         />
       </div>
-      <Button onClick={handleSubmit} disabled={!fromDate || !toDate}>
-        Submit
+
+      <Button
+        onClick={handleSubmit}
+        disabled={!fromDate || !toDate || isLoading}
+        className="min-w-[120px]"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Please wait
+          </>
+        ) : (
+          "Submit"
+        )}
       </Button>
     </div>
   );

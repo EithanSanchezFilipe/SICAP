@@ -5,4 +5,7 @@ export interface Sensor {
   measurements: Measurements[];
 }
 
-interface Measurements {}
+export interface Measurements {
+  time: string;
+  value: number;
+}
