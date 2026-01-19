@@ -23,45 +23,46 @@ export class SensorController extends Controller {
   @Get("{id}")
   @Response<{ message: string }>(404, "No sensor found")
   @Response<{ message: string }>(500, "Something went wrong")
-  public getSensorsInformation(
-    @Path() id: string
+  public async getSensorsInformation(
+    @Path() id: string,
+    @Query("from") from?: string,
+    @Query("to") to?: string
   ): Promise<SensorResponse | { message: string }> {
+    console.log("Received on backend:", from, to);
+
+    const finalFrom = from && from !== "undefined" ? from : "-1h";
+    const finalTo = to && to !== "undefined" ? to : new Date().toISOString();
+
     const numericId = Number(id);
     if (isNaN(numericId)) {
       this.setStatus(400);
-      return Promise.resolve({ message: "Invalid sensor ID" });
+      return { message: "Invalid sensor ID" };
     }
 
-    return prisma.sensor
-      .findUnique({
+    try {
+      const sensor = await prisma.sensor.findUnique({
         where: { id: numericId },
         select: { id: true, name: true, type: true, machineId: true },
-      })
-      .then((sensor) => {
-        if (!sensor) {
-          this.setStatus(404);
-          return { message: "No sensor found" };
-        }
-
-        return getSensorData(
-          sensor.id.toString(),
-          sensor.machineId?.toString(),
-          "-1h"
-        )
-          .then((measurements: SensorMeasurement[]) => {
-            return { ...sensor, measurements };
-          })
-          .catch((error: any) => {
-            console.error(error);
-            this.setStatus(500);
-            return { message: "Something went wrong" };
-          });
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setStatus(500);
-        return { message: "Something went wrong" };
       });
+
+      if (!sensor) {
+        this.setStatus(404);
+        return { message: "No sensor found" };
+      }
+
+      const measurements = await getSensorData(
+        sensor.id.toString(),
+        sensor.machineId?.toString(),
+        finalFrom,
+        finalTo
+      );
+
+      return { ...sensor, measurements };
+    } catch (error) {
+      console.error(error);
+      this.setStatus(500);
+      return { message: "Something went wrong" };
+    }
   }
 
   @Post("{id}")

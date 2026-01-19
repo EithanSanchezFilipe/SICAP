@@ -29,7 +29,6 @@ export class MachineController extends Controller {
   @Get()
   @Response<{ message: string }>(404, "No machines found")
   @Response<{ message: string }>(500, "Something went wrong")
-  @Get()
   @Response<{ message: string }>(404, "No machines found")
   @Response<{ message: string }>(500, "Something went wrong")
   public async getMachines(

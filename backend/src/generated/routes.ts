@@ -93,6 +93,8 @@ export function RegisterRoutes(app: Router) {
     
         const argsSensorController_getSensorsInformation: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                from: {"in":"query","name":"from","dataType":"string"},
+                to: {"in":"query","name":"to","dataType":"string"},
         };
         app.get('/sensor/:id',
             ...(fetchMiddlewares<RequestHandler>(SensorController)),

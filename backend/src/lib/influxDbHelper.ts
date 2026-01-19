@@ -34,11 +34,12 @@ export function writeSensorData(
 export function getSensorData(
   sensorId?: string,
   machineId?: string,
-  rangeStart: string = "-1h"
+  rangeStart: string = "-1h",
+  rangeFinish: string = "-0m"
 ): Promise<{ time: string; value: number }[]> {
   let fluxQuery = `
     from(bucket: "${process.env.INFLUXDB_BUCKET}")
-      |> range(start: ${rangeStart})
+      |> range(start: ${rangeStart}, stop: ${rangeFinish})
       |> filter(fn: (r) => r._measurement == "sensor_data")
   `;
 
