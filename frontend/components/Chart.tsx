@@ -31,17 +31,38 @@ interface SensorChartProps {
 }
 
 export function SensorChart({ data, title, type }: SensorChartProps) {
-  // Enhanced formatter: shows Date + Month + Hour
   const formatDateTime = (value: string) => {
     const date = new Date(value);
-
-    // Returns format: "20 Jan, 14:30"
     return date.toLocaleString("fr-FR", {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Custom dot for outliers
+  const CustomDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    if (!payload) return null;
+
+    // Ignore Recharts active state, always use our status color
+    let color = "var(--color-value)"; // normal
+    if (payload.status === "warning") color = "#FACC15"; // yellow
+    if (payload.status === "error") color = "#EF4444"; // red
+
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={4}
+        fill={color} // always the same
+        stroke="#00000010"
+        strokeWidth={1}
+        style={{ cursor: payload.reasons?.length ? "pointer" : "default" }}
+        title={payload.reasons?.join(", ")} // tooltip
+      />
+    );
   };
 
   return (
@@ -74,7 +95,7 @@ export function SensorChart({ data, title, type }: SensorChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              minTickGap={60} // Increased gap for longer labels
+              minTickGap={60}
               tickFormatter={formatDateTime}
             />
             <YAxis
@@ -99,8 +120,8 @@ export function SensorChart({ data, title, type }: SensorChartProps) {
               stroke="var(--color-value)"
               strokeWidth={2}
               animationDuration={1500}
+              dot={<CustomDot />}
             />
-
             <ChartBrush
               dataKey="time"
               height={40}

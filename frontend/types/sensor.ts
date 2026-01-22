@@ -8,4 +8,6 @@ export interface Sensor {
 export interface Measurements {
   time: string;
   value: number;
+  status: string;
+  reasons: string[];
 }

@@ -15,7 +15,7 @@ import {
 import { PrismaClient } from "../generated/prisma/client.js";
 import { SensorResponse, SensorMeasurement } from "./interface.js";
 import { getSensorData } from "../lib/influxDbHelper.js";
-
+import { detectOutliers } from "../lib/outliers.js";
 const prisma = new PrismaClient();
 
 @Route("sensor")
@@ -26,7 +26,7 @@ export class SensorController extends Controller {
   public async getSensorsInformation(
     @Path() id: string,
     @Query("from") from?: string,
-    @Query("to") to?: string
+    @Query("to") to?: string,
   ): Promise<SensorResponse | { message: string }> {
     console.log("Received on backend:", from, to);
 
@@ -49,15 +49,18 @@ export class SensorController extends Controller {
         this.setStatus(404);
         return { message: "No sensor found" };
       }
-
       const measurements = await getSensorData(
         sensor.id.toString(),
         sensor.machineId?.toString(),
         finalFrom,
-        finalTo
+        finalTo,
       );
+      let measurementsWithFlags = measurements;
 
-      return { ...sensor, measurements };
+      if (sensor.type === "temperature" || sensor.type === "humidity") {
+        measurementsWithFlags = detectOutliers(sensor.type, measurements);
+      }
+      return { ...sensor, measurements: measurementsWithFlags };
     } catch (error) {
       console.error(error);
       this.setStatus(500);
@@ -71,7 +74,7 @@ export class SensorController extends Controller {
   @Response<{ message: string }>(500, "Failed to create machine")
   public createSensor(
     @Path() id: string,
-    @Body() body: { name: string; type: string }
+    @Body() body: { name: string; type: string },
   ): Promise<{ message: string } | SensorResponse> {
     const numericId = Number(id);
     if (isNaN(numericId)) {
@@ -110,7 +113,7 @@ export class SensorController extends Controller {
   @Response<{ message: string }>(500, "Failed to update sensor")
   public updateSensor(
     @Path() id: string,
-    @Body() body: { name?: string; type?: string }
+    @Body() body: { name?: string; type?: string },
   ): Promise<{ message: string } | SensorResponse> {
     const numericId = Number(id);
     if (isNaN(numericId)) {

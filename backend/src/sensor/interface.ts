@@ -1,6 +1,8 @@
 export interface SensorMeasurement {
   time: string; // timestamp of the measurement
   value: number; // measured value
+  status?: string;
+  reasons?: string[];
 }
 
 export interface SensorResponse {

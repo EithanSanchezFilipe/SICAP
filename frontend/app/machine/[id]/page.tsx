@@ -54,7 +54,7 @@ export default function MachinePage() {
                 Type
               </th>
               <th className="border-b px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                Data in the last minute
+                Data in the last hour
               </th>
             </tr>
           </thead>

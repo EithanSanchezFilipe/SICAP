@@ -10,7 +10,11 @@ import { Sensor, Measurements } from "@/types/sensor";
 import { DateRangePicker } from "@/components/DateHourRangePicker";
 import { DateRangeSchemaWithTransform } from "@/types/formSchemas";
 import { SensorChart } from "@/components/Chart";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 export default function SensorPage() {
   const params = useParams<{ sensorId: string }>();
   const router = useRouter();
@@ -21,7 +25,10 @@ export default function SensorPage() {
   useEffect(() => {
     sensorService
       .getById(Number(params.sensorId))
-      .then(setSensor)
+      .then((sensor) => {
+        setSensor(sensor);
+        console.log(sensor);
+      })
       .catch(() => toast.error("Could not load sensor"));
   }, [params.sensorId]);
 
@@ -86,16 +93,50 @@ export default function SensorPage() {
             <tbody className="divide-y divide-gray-100">
               {[...sensor.measurements]
                 .reverse()
-                .map((measurement: Measurements) => (
-                  <tr key={measurement.time} className="transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-black whitespace-nowrap">
-                      {new Date(measurement.time).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 text-right font-mono">
-                      {measurement.value}
-                    </td>
-                  </tr>
-                ))}
+                .map((measurement: Measurements) => {
+                  const statusColor = (() => {
+                    switch (measurement.status) {
+                      case "error":
+                        return "text-red-600 font-bold";
+                      case "warning":
+                        return "text-yellow-600 font-semibold";
+                      case "ok":
+                      default:
+                        return "text-gray-700";
+                    }
+                  })();
+
+                  return (
+                    <tr
+                      key={measurement.time}
+                      className="transition-colors hover:bg-gray-50"
+                    >
+                      <td className="px-4 py-3 text-sm font-medium text-black whitespace-nowrap">
+                        {new Date(measurement.time).toLocaleString()}
+                      </td>
+
+                      <td className="px-4 py-3 text-sm text-right font-mono">
+                        {measurement.reasons &&
+                        measurement.reasons.length > 0 ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className={statusColor}>
+                                {measurement.value}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" align="center">
+                              {measurement.reasons.join(", ")}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className={statusColor}>
+                            {measurement.value}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
